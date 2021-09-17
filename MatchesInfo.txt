@@ -1,0 +1,7 @@
+tour played, total: 
+[ PSG FC |6:4|  FC Bayern
+,  Rubin FC |5:3|  Ajax FC
+,  Chelsea FC |2:5|  Real Madrid FC
+,  Arsenal FC |2:1| Barcelona FC
+]
+plays next tour: [ PSG FC,  Rubin FC,  Real Madrid FC,  Arsenal FC]

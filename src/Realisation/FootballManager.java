@@ -1,13 +1,12 @@
 package Realisation;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 
 public class FootballManager {
     private List<String> teamParser(String path) {
+        Random random = new Random();
         List<String> teams = new ArrayList<>();
         try {
             BufferedReader bufferedReader = new BufferedReader(new FileReader(path));
@@ -20,33 +19,86 @@ public class FootballManager {
             e.printStackTrace();
         }
         System.out.println(teams);
-        return teams;
+        List<String> mixedTeams = new ArrayList<>();
+        while (teams.size() > 0) {
+            mixedTeams.add(teams.remove(random.nextInt(teams.size())));
+        }
+        return mixedTeams;
     }
 
-    private Map<String, String> couples(List<String> teams) {
+    private List<Match> couples(List<String> teams) {
         Random random = new Random();
         Map<String, String> couples = new HashMap<>();
         System.out.println(teams.size());
-        for (int i = 0; i < teams.size(); i++) {
-            couples.put(String.valueOf(teams.remove(random.nextInt(teams.size()))), String.valueOf(teams.remove(random.nextInt(teams.size()))));
+        int t = teams.size() / 2;
+        for (int i = 0; i < t; i++) {
+            couples.put(teams.remove(0), teams.remove(0));
         }
-        return couples;
-    }
 
-    private Map<String, String> goals(Map<String, String> couples) {
-        Random random = new Random();
-        System.out.println(couples);
-        HashMap<String, String> totalGoals = new HashMap<>();
+
+        ArrayList<Match> matches = new ArrayList<>();
         for (String couple : couples.keySet()) {
-            totalGoals.put(couple + " - " + couples.get(couple), random.nextInt(7) + ":" + random.nextInt(7));
+            matches.add(new Match(couple, couples.get(couple), random.nextInt(7) + ":" + random.nextInt(7)));
         }
-        return totalGoals;
+        return matches;
     }
 
-    public Map<String, String> start(String path) {
+
+    public List<Match> start(String path) {
         FootballManager footballManager = new FootballManager();
         List<String> teams = footballManager.teamParser(path);
-        Map<String, String> totalGoals = footballManager.couples(teams);
-        return footballManager.goals(totalGoals);
+        return footballManager.couples(teams);
+    }
+
+    public List<String> tourChampionship(List<Match> matches) {
+        List<String> nextPlayers = new ArrayList<>();
+        for (Match match : matches) {
+            String[] total = match.getTotal().split(":");
+            if (Integer.valueOf(total[0]) > Integer.valueOf(total[1])) {
+                nextPlayers.add(match.getFirstTeam());
+            } else {
+                nextPlayers.add(match.getSecondTeam());
+            }
+        }
+        System.out.println(nextPlayers);
+        return nextPlayers;
+    }
+
+    public void databaseInfo(List<String> nextPlayers, List<Match> matchesPlayed) {
+
+        File file = new File("MatchesInfo.txt");
+
+
+        try {
+            file.createNewFile();
+            FileWriter fileWriter = new FileWriter(file.getPath());
+            fileWriter.write("tour played, total: \n" + matchesPlayed.toString() + "\n");
+            fileWriter.write("plays next tour: " + nextPlayers.toString() + "\n");
+            fileWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public List<Match> findMatch(String path, String team) {
+        List<Match> matches=new ArrayList<>();
+        try {
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(path));
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                line.substring(4);
+                String[] atributes = line.split("\\|");
+                if (atributes.equals(team)) {
+                    matches.add(new Match(atributes[0], atributes[2], atributes[1]));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }catch(StringIndexOutOfBoundsException e){
+            System.out.println("lol");
+        }
+
+        return matches;
     }
 }
