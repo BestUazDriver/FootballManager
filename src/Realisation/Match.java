@@ -15,28 +15,16 @@ public class Match {
         return firstTeam;
     }
 
-    public void setFirstTeam(String firstTeam) {
-        this.firstTeam = firstTeam;
-    }
-
     public String getSecondTeam() {
         return secondTeam;
-    }
-
-    public void setSecondTeam(String secondTeam) {
-        this.secondTeam = secondTeam;
     }
 
     public String getTotal() {
         return total;
     }
 
-    public void setTotal(String total) {
-        this.total = total;
-    }
-
     @Override
     public String toString() {
-        return firstTeam + " |" + total + "| " + secondTeam + "\n";
+        return firstTeam + "|" + total + "|" + secondTeam + "\n";
     }
 }

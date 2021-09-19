@@ -18,7 +18,7 @@ public class FootballManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println(teams);
+        System.out.println("teams: " + teams);
         List<String> mixedTeams = new ArrayList<>();
         while (teams.size() > 0) {
             mixedTeams.add(teams.remove(random.nextInt(teams.size())));
@@ -29,7 +29,6 @@ public class FootballManager {
     private List<Match> couples(List<String> teams) {
         Random random = new Random();
         Map<String, String> couples = new HashMap<>();
-        System.out.println(teams.size());
         int t = teams.size() / 2;
         for (int i = 0; i < t; i++) {
             couples.put(teams.remove(0), teams.remove(0));
@@ -43,14 +42,7 @@ public class FootballManager {
         return matches;
     }
 
-
-    public List<Match> start(String path) {
-        FootballManager footballManager = new FootballManager();
-        List<String> teams = footballManager.teamParser(path);
-        return footballManager.couples(teams);
-    }
-
-    public List<String> tourChampionship(List<Match> matches) {
+    private List<String> tourChampionship(List<Match> matches) {
         List<String> nextPlayers = new ArrayList<>();
         for (Match match : matches) {
             String[] total = match.getTotal().split(":");
@@ -64,17 +56,15 @@ public class FootballManager {
         return nextPlayers;
     }
 
-    public void databaseInfo(List<String> nextPlayers, List<Match> matchesPlayed) {
-
-        File file = new File("MatchesInfo.txt");
+    private void databaseInfo(List<String> nextPlayers, List<Match> matchesPlayed, FileWriter fileWriter) {
 
 
         try {
-            file.createNewFile();
-            FileWriter fileWriter = new FileWriter(file.getPath());
-            fileWriter.write("tour played, total: \n" + matchesPlayed.toString() + "\n");
-            fileWriter.write("plays next tour: " + nextPlayers.toString() + "\n");
-            fileWriter.close();
+            fileWriter.write("\n tour played, total:\n");
+            for (Match match : matchesPlayed) {
+                fileWriter.write(match.toString());
+            }
+            fileWriter.write("\n plays next tour: " + nextPlayers.toString() + "\n");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -82,23 +72,53 @@ public class FootballManager {
     }
 
     public List<Match> findMatch(String path, String team) {
-        List<Match> matches=new ArrayList<>();
+        List<Match> matches = new ArrayList<>();
         try {
             BufferedReader bufferedReader = new BufferedReader(new FileReader(path));
             String line;
             while ((line = bufferedReader.readLine()) != null) {
-                line.substring(4);
                 String[] atributes = line.split("\\|");
-                if (atributes.equals(team)) {
-                    matches.add(new Match(atributes[0], atributes[2], atributes[1]));
+                for (int i = 0; i < atributes.length; i++) {
+                    if (atributes[i].equals(team)) {
+                        matches.add(new Match(atributes[0], atributes[2], atributes[1]));
+                    }
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
-        }catch(StringIndexOutOfBoundsException e){
-            System.out.println("lol");
+        } catch (StringIndexOutOfBoundsException e) {
+            e.printStackTrace();
         }
 
         return matches;
+    }
+
+    public void tournament(String path) {
+        File file = new File("MatchesInfo.txt");
+        try {
+            file.createNewFile();
+            FileWriter fileWriter = new FileWriter(file.getPath());
+            fileWriter.write("Tournament started! \n");
+            System.out.println("Tournament started!!!");
+            int tour = 1;
+            FootballManager footballManager = new FootballManager();
+            List<String> teams;
+            List<Match> matches;
+            teams = footballManager.teamParser(path);
+            fileWriter.write("\n Teams: \n" + teams + "\n");
+            while (teams.size() > 1) {
+                System.out.println("tour " + tour);
+                matches = footballManager.couples(teams);
+                teams = footballManager.tourChampionship(matches);
+                footballManager.databaseInfo(teams, matches, fileWriter);
+                tour++;
+
+            }
+            System.out.println("\n Winner: " + teams.get(0) + "\n");
+            fileWriter.write("\n Winner: " + teams.get(0));
+            fileWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
